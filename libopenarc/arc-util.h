@@ -37,4 +37,6 @@ extern void arc_min_timeval __P((struct timeval *, struct timeval *,
 extern u_char *arc_strndup(u_char *, size_t);
 extern ARC_STAT arc_tmpfile __P((ARC_MESSAGE *, int *, _Bool));
 
+extern void arc_std_header __P((struct arc_dstring *));
+
 #endif /* _ARC_UTIL_H_ */
