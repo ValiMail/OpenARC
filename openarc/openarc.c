@@ -3275,10 +3275,20 @@ mlfi_eom(SMFICTX *ctx)
 
 			for (n = 0; n < ar.ares_count; n++)
 			{
-				arcf_dstring_printf(afc->mctx_tmpstr,
-				                    "%s=%s",
-				                    ares_getmethod(ar.ares_result[n].result_method),
-				                    ares_getresult(ar.ares_result[n].result_result));
+				if (n == 0)
+				{
+					arcf_dstring_printf(afc->mctx_tmpstr,
+															"%s=%s",
+															ares_getmethod(ar.ares_result[n].result_method),
+															ares_getresult(ar.ares_result[n].result_result));
+				}
+				else
+				{
+					arcf_dstring_printf(afc->mctx_tmpstr,
+															" %s=%s",
+															ares_getmethod(ar.ares_result[n].result_method),
+															ares_getresult(ar.ares_result[n].result_result));					
+				}
 
 				for (m = 0;
 				     m < ar.ares_result[n].result_props;

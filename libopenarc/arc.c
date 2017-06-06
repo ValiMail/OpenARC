@@ -2680,6 +2680,8 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 	EVP_PKEY *pkey;
 	RSA *rsa;
 
+	printf("------AR-------   %s\n\n", ar);
+	
 	assert(msg != NULL);
 	assert(seal != NULL);
 	assert(authservid != NULL);
