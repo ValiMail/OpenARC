@@ -815,34 +815,28 @@ void
 arc_std_header(struct arc_dstring *dstr)
 {
   char *token;
-  char *tokens[20];
+  char *tokens[20]; // TODO:GS - be smarter here
 
+	// strip out header name
   int hofs;
-  char *in_str = (char *) arc_dstring_get(dstr);
+  char *input = (char *) arc_dstring_get(dstr);
   for(hofs = 0; hofs < arc_dstring_len(dstr) - 1; hofs++)
-    if(in_str[hofs] == ':')
+    if(input[hofs] == ':')
       break;
-  char *str = in_str + hofs + 2;
-  //  printf("Input Value: %s\n", str);
+  char *str = input + hofs + 2;
 
-  // tokenize
+  // tokenize & lowercase
   int ntok = 0;
   while((token = strtok_r(str, "; ", &str)))
-    {
-      tokens[ntok] = token;
-
-      if(token[0] != 'b')
-        {
-          for(int i = 0; token[i]; i++)
-            {
-              token[i] = tolower(token[i]);
-            }
-        }
-
-      ntok++;
-      //printf("tok: %s\n", token);
-    }
-
+	{
+		tokens[ntok] = token;
+		
+		if(token[0] != 'b')
+			for(int i = 0; token[i]; i++)
+				token[i] = tolower(token[i]);
+		
+		ntok++;
+	}
   tokens[ntok] = '\0';
 
   // sort tokens
@@ -851,26 +845,24 @@ arc_std_header(struct arc_dstring *dstr)
   qsort(tokens, cnt, size, compare);
 
   /*
-  printf("\nSorted: \n");
-  for(int i=0; i < 9; i++){
+		printf("\nSorted: \n");
+		for(int i=0; i < 9; i++){
     printf("tok: %s\n", tokens[i]);
-  }
+		}
   */
 
-  //  arc_dstring_blank(dstr);
+	//
   struct arc_dstring *dstr2;
-  dstr2 = arc_dstring_new(dstr->ds_msg, 500, 0);
-  arc_dstring_catn(dstr2, in_str, hofs + 2);
+  dstr2 = arc_dstring_new(dstr->ds_msg, 500, 0); // TODO:GS - be smarter here?
+  arc_dstring_catn(dstr2, input, hofs + 2);
 
+	char *delim = "; ";
   for(int i=0; i < ntok; i++)
-    {
-      arc_dstring_cat(dstr2, tokens[i]);
-      if(i != ntok - 1)
-        {
-          arc_dstring_cat1(dstr2, (int)';');
-          arc_dstring_cat1(dstr2, (int)' ');
-        }
-    }
+	{
+		arc_dstring_cat(dstr2, tokens[i]);
+		if(i != ntok - 1)       
+			arc_dstring_catn(dstr2, delim, (size_t) 2);       
+	}
 
   arc_dstring_copy(dstr, (char *) arc_dstring_get(dstr2));
   arc_dstring_free(dstr2);

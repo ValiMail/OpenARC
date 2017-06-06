@@ -435,9 +435,7 @@ arc_genamshdr(ARC_MESSAGE *msg, struct arc_dstring *dstr, char *delim,
 		                   	(u_long) msg->arc_bodycanon->canon_wrote);
 		}
 
-    // gene stuff
 		/* h= */
-    /*
 		firsthdr = TRUE;
 		for (hdr = msg->arc_hhead; hdr != NULL; hdr = hdr->hdr_next)
 		{
@@ -459,9 +457,7 @@ arc_genamshdr(ARC_MESSAGE *msg, struct arc_dstring *dstr, char *delim,
 			firsthdr = FALSE;
 			arc_dstring_catn(dstr, hdr->hdr_text, hdr->hdr_namelen);
 		}
-    */
-    const char* tmp_hdr = "from:to:date:subject:mime-version:arc-authentication-results";
-    arc_dstring_printf(dstr, ";%sh=%s", delim, tmp_hdr);
+    
 	}
 
 	/* and finally, an empty b= */
@@ -2619,7 +2615,7 @@ arc_eom(ARC_MESSAGE *msg)
 }
 
 
-// gene stuff
+// gene stuff TODO:GS cleanup
 void arc_insert_sig(struct arc_dstring *dstr, char *sig)
 {
   struct arc_dstring *dstr2;
