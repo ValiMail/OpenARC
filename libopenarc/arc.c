@@ -435,8 +435,9 @@ arc_genamshdr(ARC_MESSAGE *msg, struct arc_dstring *dstr, char *delim,
 		                   	   (u_long) msg->arc_bodycanon->canon_wrote);
 		}
 
-		if (msg->arc_library->arcl_oversignhdrs != NULL &&
-		    msg->arc_library->arcl_oversignhdrs[0] != NULL)
+		/* h= */
+		firsthdr = TRUE;
+		for (hdr = msg->arc_hhead; hdr != NULL; hdr = hdr->hdr_next)
 		{
 			_Bool wrote = FALSE;
 
@@ -2696,7 +2697,7 @@ arc_eom(ARC_MESSAGE *msg)
 }
 
 
-// gene stuff
+// gene stuff TODO:GS cleanup
 void arc_insert_sig(struct arc_dstring *dstr, char *sig)
 {
   struct arc_dstring *dstr2;
