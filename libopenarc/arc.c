@@ -3114,12 +3114,7 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 	BIO_free(keydata);
 
 	*seal = msg->arc_sealhead;
-
-  /* ggene stuff */
-  printf("%s\n", msg->arc_sealhead->hdr_text);
-  printf("%s\n", msg->arc_sealhead->hdr_next->hdr_text);
-  printf("%s\n", msg->arc_sealhead->hdr_next->hdr_next->hdr_text);
-
+	
 	return ARC_STAT_OK;
 }
 
