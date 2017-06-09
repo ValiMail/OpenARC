@@ -23,7 +23,7 @@ extern "C" {
 
 /*
 **  version -- 0xrrMMmmpp
-**  
+**
 **  	rr == release number
 **  	MM == major revision number
 **  	mm == minor revision number
@@ -328,7 +328,7 @@ extern void arc_close __P((ARC_LIB *));
 extern const char *arc_geterror __P((ARC_MESSAGE *));
 
 /*
-** 
+**
 **  ARC_OPTIONS -- get/set library options
 **
 **  Parameters:
@@ -405,6 +405,7 @@ extern ARC_STAT arc_header_field __P((ARC_MESSAGE *, u_char *, size_t));
 **
 **  Parameters:
 **  	msg -- message handle
+**  	sigheaders -- list of headers to sign
 **
 **  Return value:
 **  	An ARC_STAT_* constant.
@@ -413,7 +414,7 @@ extern ARC_STAT arc_header_field __P((ARC_MESSAGE *, u_char *, size_t));
 **  	This can probably be merged with arc_eom().
 */
 
-extern ARC_STAT arc_eoh __P((ARC_MESSAGE *));
+extern ARC_STAT arc_eoh __P((ARC_MESSAGE *, char *));
 
 /*
 **  ARC_BODY -- process a body chunk

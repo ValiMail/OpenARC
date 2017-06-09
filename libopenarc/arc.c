@@ -2273,7 +2273,7 @@ arc_header_field(ARC_MESSAGE *msg, u_char *hdr, size_t hlen)
 */
 
 ARC_STAT
-arc_eoh(ARC_MESSAGE *msg)
+arc_eoh(ARC_MESSAGE *msg, char *sigheaders)
 {
 	_Bool keep;
 	u_int c;
@@ -2409,7 +2409,7 @@ arc_eoh(ARC_MESSAGE *msg)
 	**  Request specific canonicalizations we want to run.
 	*/
 
-	/* header */
+	/* headers, validation */
 	h = NULL;
 	htag = NULL;
 	if (nsets > 0)
@@ -2419,13 +2419,25 @@ arc_eoh(ARC_MESSAGE *msg)
 	}
 	status = arc_add_canon(msg, ARC_CANONTYPE_HEADER, msg->arc_canonhdr,
 	                       msg->arc_signalg, htag, h, (ssize_t) -1,
-	                       &msg->arc_hdrcanon);
+	                       &msg->arc_valid_hdrcanon);
 	if (status != ARC_STAT_OK)
 	{
 		arc_error(msg,
 			  "failed to initialize header canonicalization object");
 		return status;
 	}
+
+	/* headers, signing */
+	status = arc_add_canon(msg, ARC_CANONTYPE_HEADER, msg->arc_canonhdr,
+	                       msg->arc_signalg, sigheaders, NULL, (ssize_t) -1,
+	                       &msg->arc_sign_hdrcanon);
+	if (status != ARC_STAT_OK)
+	{
+		arc_error(msg,
+			  "failed to initialize header canonicalization object");
+		return status;
+	}
+
 
 	/* body */
 	status = arc_add_canon(msg, ARC_CANONTYPE_BODY, msg->arc_canonbody,
@@ -2847,7 +2859,7 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 		return ARC_STAT_INTERNAL;
 	}
 
-	status = arc_canon_getfinal(msg->arc_hdrcanon, &digest, &diglen);
+	status = arc_canon_getfinal(msg->arc_sign_hdrcanon, &digest, &diglen);
 	if (status != ARC_STAT_OK)
 	{
 		arc_error(msg, "arc_canon_getfinal() failed");

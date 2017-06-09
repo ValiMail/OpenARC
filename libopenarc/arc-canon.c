@@ -1324,46 +1324,67 @@ arc_canon_runheaders(ARC_MESSAGE *msg)
 			memset(hdrset, '\0', sizeof *hdrset);
 			nhdrs = 0;
 
-			/* tag all header fields to be signed */
-			for (hdr = msg->arc_hhead;
-			     hdr != NULL;
-			     hdr = hdr->hdr_next)
+			if (cur->canon_hdrlist == NULL)
 			{
-				if (strncasecmp(ARC_AR_HDRNAME,
-				                hdr->hdr_text,
-				                hdr->hdr_namelen) == 0 ||
-				    strncasecmp(ARC_MSGSIG_HDRNAME,
-				                hdr->hdr_text,
-				                hdr->hdr_namelen) == 0 ||
-				    strncasecmp(ARC_SEAL_HDRNAME,
-				                hdr->hdr_text,
-				                hdr->hdr_namelen) == 0)
-					continue;
+				/* tag all header fields to be signed */
+				for (hdr = msg->arc_hhead;
+						 hdr != NULL;
+						 hdr = hdr->hdr_next)
+				{
+					if (strncasecmp(ARC_AR_HDRNAME,
+													hdr->hdr_text,
+													hdr->hdr_namelen) == 0 ||
+							strncasecmp(ARC_MSGSIG_HDRNAME,
+													hdr->hdr_text,
+													hdr->hdr_namelen) == 0 ||
+							strncasecmp(ARC_SEAL_HDRNAME,
+													hdr->hdr_text,
+													hdr->hdr_namelen) == 0)
+						continue;
 
-				tmp = arc_dstring_get(msg->arc_hdrbuf);
+					tmp = arc_dstring_get(msg->arc_hdrbuf);
 
-				if (tmp[0] != '\0')
-					arc_dstring_cat1(msg->arc_hdrbuf, ':');
+					if (tmp[0] != '\0')
+						arc_dstring_cat1(msg->arc_hdrbuf, ':');
 
-				arc_dstring_catn(msg->arc_hdrbuf,
-				                 hdr->hdr_text,
-				                 hdr->hdr_namelen);
+					arc_dstring_catn(msg->arc_hdrbuf,
+													 hdr->hdr_text,
+													 hdr->hdr_namelen);
+				}
+
+				memset(hdrset, '\0', n);
+
+				/* do header selection */
+				nhdrs = arc_canon_selecthdrs(msg,
+																		 arc_dstring_get(msg->arc_hdrbuf),
+																		 hdrset,
+																		 msg->arc_hdrcnt);
+
+				if (nhdrs == -1)
+				{
+					arc_error(msg,
+										"arc_canon_selecthdrs() failed during canonicalization");
+					free(hdrset);
+					return ARC_STAT_INTERNAL;
+				}
 			}
-
-			memset(hdrset, '\0', n);
-
-			/* do header selection */
-			nhdrs = arc_canon_selecthdrs(msg,
-			                             arc_dstring_get(msg->arc_hdrbuf),
-			                             hdrset,
-			                             msg->arc_hdrcnt);
-
-			if (nhdrs == -1)
+			else
 			{
-				arc_error(msg,
-				          "arc_canon_selecthdrs() failed during canonicalization");
-				free(hdrset);
-				return ARC_STAT_INTERNAL;
+				printf("SIGNING, NOT NULL\n");
+				memset(hdrset, '\0', n);
+
+				nhdrs = arc_canon_selecthdrs(msg,
+																		 cur->canon_hdrlist,
+																		 hdrset,
+																		 msg->arc_hdrcnt);
+
+				if (nhdrs == -1)
+				{
+					arc_error(msg,
+										"arc_canon_selecthdrs() failed during canonicalization");
+					free(hdrset);
+					return ARC_STAT_INTERNAL;
+				}
 			}
 		}
 
@@ -2013,7 +2034,7 @@ arc_canon_gethashes(ARC_MESSAGE *msg, void **hh, size_t *hhlen,
 	size_t hdlen;
 	size_t bdlen;
 
-	hdc = msg->arc_hdrcanon;
+	hdc = msg->arc_valid_hdrcanon;
 	bdc = msg->arc_bodycanon;
 
 	status = arc_canon_getfinal(hdc, &hd, &hdlen);

@@ -179,7 +179,8 @@ struct arc_msghandle
 	struct arc_dstring *	arc_hdrbuf;
 	struct arc_canon *	arc_sealcanon;
 	struct arc_canon **	arc_sealcanons;
-	struct arc_canon *	arc_hdrcanon;
+	struct arc_canon *	arc_valid_hdrcanon;
+	struct arc_canon *	arc_sign_hdrcanon;
 	struct arc_canon *	arc_bodycanon;
 	struct arc_canon *	arc_canonhead;
 	struct arc_canon *	arc_canontail;

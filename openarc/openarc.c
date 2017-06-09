@@ -127,6 +127,7 @@ struct arcf_config
 	char *		conf_authservid;	/* ID for A-R fields */
 	char *		conf_peerfile;		/* peer hosts table */
 	char *		conf_domain;		/* domain */
+	char *		conf_sigheaders;		/* : separated list of headers to sign */
 	u_char *	conf_keydata;		/* binary key data */
 	size_t		conf_keylen;		/* key length */
 	ssize_t		conf_maxhdrsz;		/* max. header size */
@@ -1424,6 +1425,10 @@ arcf_config_load(struct config *data, struct arcf_config *conf,
 		(void) config_get(data, "MaximumHeaders",
 		                  &conf->conf_maxhdrsz,
 		                  sizeof conf->conf_maxhdrsz);
+
+    (void) config_get(data, "SignHeaders",
+		                  &conf->conf_sigheaders,
+		                  sizeof conf->conf_sigheaders);
 
 		str = NULL;
 		(void) config_get(data, "FixedTimestamp", &str, sizeof str);
@@ -3084,7 +3089,7 @@ mlfi_eoh(SMFICTX *ctx)
 	}
 
 	/* signal end of headers to libopenarc */
-	status = arc_eoh(afc->mctx_arcmsg);
+	status = arc_eoh(afc->mctx_arcmsg, conf->conf_sigheaders);
 	if (status != ARC_STAT_OK)
 	{
 		if (conf->conf_dolog)
