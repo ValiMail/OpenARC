@@ -441,8 +441,6 @@ arc_canon_header(ARC_MESSAGE *msg, ARC_CANON *canon, struct arc_hdrfield *hdr,
 	                                 crlf);
 
 
-	printf("CANON: %s\n", arc_dstring_get(msg->arc_canonbuf));	
-
 	if (status != ARC_STAT_OK)
 		return status;
 

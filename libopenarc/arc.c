@@ -2955,8 +2955,6 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 	**  Part III: Construct a new AS
 	*/
 
-	printf("CREATE AS \n\n");
-
 	arc_dstring_blank(dstr);
 	arc_dstring_catn(dstr, (u_char *) ARC_SEAL_HDRNAME ": ",
 	                 sizeof ARC_SEAL_HDRNAME + 1);
