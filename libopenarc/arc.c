@@ -2679,8 +2679,6 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 	BIO *keydata;
 	EVP_PKEY *pkey;
 	RSA *rsa;
-
-	printf("------AR-------   %s\n\n", ar);
 	
 	assert(msg != NULL);
 	assert(seal != NULL);
@@ -2831,10 +2829,7 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 	arc_dstring_catn(dstr, sighdr, len);
 	len = arc_dstring_len(dstr);
 
-  // ggene stuff
-  printf("Input Value: %s\n", (char *) arc_dstring_get(dstr));
   arc_std_header(dstr);
-  printf("Output Value: %s\n", (char *) arc_dstring_get(dstr));
 
 	hdr.hdr_text = arc_dstring_get(dstr);
 	hdr.hdr_colon = hdr.hdr_text + ARC_MSGSIG_HDRNAMELEN;
@@ -2915,13 +2910,7 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 	}
 
 	/* append it to the stub */
-  // ggene stuff
-  //  arc_dstring_cat(dstr, b64sig);
-
-  //printf("\nSIG: %s\n", b64sig);
-  //printf("Input Value: %s\n", (char *) arc_dstring_get(dstr));
   arc_insert_sig(dstr, b64sig);
-  //printf("Output Value: %s\n", (char *) arc_dstring_get(dstr));
 
 	/* XXX -- wrapping needs to happen here */
 
@@ -2965,6 +2954,8 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 	/*
 	**  Part III: Construct a new AS
 	*/
+
+	printf("CREATE AS \n\n");
 
 	arc_dstring_blank(dstr);
 	arc_dstring_catn(dstr, (u_char *) ARC_SEAL_HDRNAME ": ",

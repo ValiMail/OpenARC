@@ -411,7 +411,6 @@ ares_parse(u_char *hdr, struct authres *ar)
 	{		
 		if (tokens[c][0] == '(')		/* comment */
 		{
-			printf("found comment %s\n", tokens[c]);
 			strlcpy((char *) ar->ares_result[n - 1].result_comment,
 			        (char *) tokens[c],
 			        sizeof ar->ares_result[n - 1].result_comment);

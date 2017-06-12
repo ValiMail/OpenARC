@@ -440,6 +440,9 @@ arc_canon_header(ARC_MESSAGE *msg, ARC_CANON *canon, struct arc_hdrfield *hdr,
 	                                 hdr->hdr_text, hdr->hdr_textlen,
 	                                 crlf);
 
+
+	printf("CANON: %s\n", arc_dstring_get(msg->arc_canonbuf));	
+
 	if (status != ARC_STAT_OK)
 		return status;
 
@@ -1186,7 +1189,7 @@ arc_canon_runheaders_seal(ARC_MESSAGE *msg)
 
 		if (cur->canon_done)
 			continue;
-
+		
 		/* write all the ARC sets once more for re-sealing */
 		status = arc_canon_header(msg, cur,
 		                          msg->arc_sets[n].arcset_aar,
@@ -1208,7 +1211,7 @@ arc_canon_runheaders_seal(ARC_MESSAGE *msg)
 	}
 
 	/* now finalize the main one */
-	arc_canon_finalize(msg->arc_sealcanon);
+	//arc_canon_finalize(msg->arc_sealcanon);
 
 	return ARC_STAT_OK;
 }
