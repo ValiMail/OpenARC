@@ -408,9 +408,15 @@ ares_parse(u_char *hdr, struct authres *ar)
 	n = 0;
 
 	for (c = 0; c < ntoks; c++)
-	{
+	{		
 		if (tokens[c][0] == '(')		/* comment */
+		{
+			printf("found comment %s\n", tokens[c]);
+			strlcpy((char *) ar->ares_result[n - 1].result_comment,
+			        (char *) tokens[c],
+			        sizeof ar->ares_result[n - 1].result_comment);
 			continue;
+		}
 
 		switch (state)
 		{
@@ -508,9 +514,10 @@ ares_parse(u_char *hdr, struct authres *ar)
 
 			break;
 
-		  case 5:				/* result */
+		  case 5:				/* result */				
 			ar->ares_result[n - 1].result_result = ares_convert(aresults,
 			                                                    (char *) tokens[c]);
+			ar->ares_result[n - 1].result_comment[0] = '\0';
 			prevstate = state;
 			state = 6;
 

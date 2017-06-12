@@ -3270,9 +3270,6 @@ mlfi_eom(SMFICTX *ctx)
 			int m;
 			int n;
 
-			if (arcf_dstring_len(afc->mctx_tmpstr) > 0)
-				arcf_dstring_cat(afc->mctx_tmpstr, "; ");
-
 			for (n = 0; n < ar.ares_count; n++)
 			{
 				if (n == 0)
@@ -3288,6 +3285,13 @@ mlfi_eom(SMFICTX *ctx)
 															" %s=%s",
 															ares_getmethod(ar.ares_result[n].result_method),
 															ares_getresult(ar.ares_result[n].result_result));					
+				}
+
+				if(ar.ares_result[n].result_comment[0] != '\0')
+				{
+					arcf_dstring_printf(afc->mctx_tmpstr,
+					                    " %s",
+					                    ar.ares_result[n].result_comment);
 				}
 
 				for (m = 0;
@@ -3307,6 +3311,10 @@ mlfi_eom(SMFICTX *ctx)
 					                    " reason=\"%s\"",
 					                    ar.ares_result[0].result_reason);
 				}
+
+				if (n != ar.ares_count - 1)		 
+					arcf_dstring_cat(afc->mctx_tmpstr, "; ");			
+				
 			}
 		}
 	}
