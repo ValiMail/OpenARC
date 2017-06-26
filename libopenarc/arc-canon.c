@@ -439,7 +439,7 @@ arc_canon_header(ARC_MESSAGE *msg, ARC_CANON *canon, struct arc_hdrfield *hdr,
 	status = arc_canon_header_string(msg->arc_canonbuf, canon->canon_canon,
 	                                 hdr->hdr_text, hdr->hdr_textlen,
 	                                 crlf);
-
+	
 	if (status != ARC_STAT_OK)
 		return status;
 
@@ -1450,7 +1450,6 @@ arc_canon_runheaders(ARC_MESSAGE *msg)
 		tmphdr.hdr_flags = 0;
 		tmphdr.hdr_next = NULL;
 
-		arc_lowerhdr(tmphdr.hdr_text);
 		(void) arc_canon_header(msg, cur, &tmphdr, FALSE);
 		arc_canon_buffer(cur, NULL, 0);
 
@@ -2099,4 +2098,49 @@ arc_canon_add_to_seal(ARC_MESSAGE *msg)
 	}
 
 	return ARC_STAT_OK;
+}
+
+
+/*
+**  ARC_EXTRACT_CANON_T -- parse a c= tag
+**
+**  Parameters:
+**  	tag        -- c=
+**    hdr_canon  -- the header canon output
+**    body_canon -- the body canon output
+**
+**  Return value:
+**  	ARC_STAT_OK -- successful completion
+*/
+
+
+ARC_STAT
+arc_parse_canon_t(unsigned char *tag, arc_canon_t *hdr_canon, arc_canon_t *body_canon)
+{
+	if(strcmp(tag, "relaxed/relaxed") == 0)
+	{
+		*hdr_canon  = ARC_CANON_RELAXED;
+		*body_canon = ARC_CANON_RELAXED;
+		return ARC_STAT_OK;
+	}
+	else if(strcmp(tag, "relaxed/simple") == 0)
+	{
+		*hdr_canon  = ARC_CANON_RELAXED;
+		*body_canon = ARC_CANON_SIMPLE;
+		return ARC_STAT_OK;
+	}
+	else if(strcmp(tag, "simple/relaxed") == 0)
+	{
+		*hdr_canon  = ARC_CANON_SIMPLE;
+		*body_canon = ARC_CANON_RELAXED;
+		return ARC_STAT_OK;
+	}
+	else if(strcmp(tag, "simple/simple") == 0)
+	{
+		*hdr_canon  = ARC_CANON_SIMPLE;
+		*body_canon = ARC_CANON_SIMPLE;
+		return ARC_STAT_OK;
+	}
+
+	return ARC_STAT_INVALID;
 }
