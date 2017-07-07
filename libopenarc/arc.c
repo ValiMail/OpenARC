@@ -460,7 +460,7 @@ arc_genamshdr(ARC_MESSAGE *msg, struct arc_dstring *dstr, char *delim,
 		}
 
 		if (msg->arc_library->arcl_oversignhdrs != NULL &&
-				msg->arc_library->arcl_oversignhdrs[0] != NULL)
+		    msg->arc_library->arcl_oversignhdrs[0] != NULL)
 		{
 			_Bool wrote = FALSE;
 
@@ -1318,6 +1318,8 @@ arc_process_set(ARC_MESSAGE *msg, arc_kvsettype_t type, u_char *str,
 	char *ctx;
 	ARC_KVSET *set;
 	const char *settype;
+	struct arc_plist *par;
+	struct arc_plist *dup;
 
 	assert(msg != NULL);
 	assert(str != NULL);
@@ -1639,14 +1641,13 @@ arc_process_set(ARC_MESSAGE *msg, arc_kvsettype_t type, u_char *str,
 			return ARC_STAT_SYNTAX;
 		}
 
-
 		/* check set for duplicates */
-		struct arc_plist *param;
-		struct arc_plist *dup;
-
-		for (param = set->set_plist[0]; param != NULL; param = param->plist_next) {
-			for (dup = param->plist_next; dup != NULL; dup = dup->plist_next) {
-				if (param->plist_param == dup->plist_param) {
+		for (par = set->set_plist[0]; par != NULL; par = par->plist_next)
+		{
+			for (dup = par->plist_next; dup != NULL; dup = dup->plist_next)
+			{
+				if (par->plist_param == dup->plist_param)
+				{
 					set->set_bad = TRUE;
 					return ARC_STAT_SYNTAX;
         }
@@ -1666,7 +1667,7 @@ arc_process_set(ARC_MESSAGE *msg, arc_kvsettype_t type, u_char *str,
 }
 
 /*
-**  ARC_GET_KEY -- acquire a public key used for verification
+**  ARC_GpET_KEY -- acquire a public key used for verification
 **
 **  Parameters:
 **  	msg -- ARC_MESSAGE handle
@@ -2399,6 +2400,8 @@ arc_eoh(ARC_MESSAGE *msg)
 	ARC_KVSET *set;
 	u_char *inst;
 	u_char *htag;
+	int hashtype;
+
 	if (msg->arc_state >= ARC_STATE_EOH)
 		return ARC_STAT_INVALID;
 	msg->arc_state = ARC_STATE_EOH;

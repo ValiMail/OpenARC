@@ -6,8 +6,6 @@
 
 #include "build-config.h"
 
-#include <bsd/string.h>
-
 /* system includes */
 #include <sys/types.h>
 #include <sys/param.h>

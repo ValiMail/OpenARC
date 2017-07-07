@@ -615,7 +615,6 @@ arc_hdrlist(u_char *buf, size_t buflen, u_char **hdrlist, _Bool first)
 	return TRUE;
 }
 
-
 /*
 **  ARC_LOWERHDR -- convert a string (presumably a header) to all lowercase,
 **                  but only up to a colon
@@ -887,8 +886,6 @@ arc_check_dns_reply(unsigned char *ansbuf, size_t anslen,
 
 	return (trunc ? 1 : 0);
 }
-
-
 
 /*
 **  ARC_COPY_ARRAY -- copy an array of char pointers

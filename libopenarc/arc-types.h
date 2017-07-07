@@ -201,7 +201,6 @@ struct arc_lib
 {
 	_Bool			arcl_signre;
 	regex_t			arcl_hdrre;
-	u_char **		arcl_requiredhdrs;
 	u_char **		arcl_oversignhdrs;
 	_Bool			arcl_dnsinit_done;
 	u_int			arcl_flsize;

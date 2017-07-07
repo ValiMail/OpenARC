@@ -1429,11 +1429,11 @@ arcf_config_load(struct config *data, struct arcf_config *conf,
 		                  &conf->conf_maxhdrsz,
 		                  sizeof conf->conf_maxhdrsz);
 
-    (void) config_get(data, "SignHeaders",
+		(void) config_get(data, "SignHeaders",
 		                  &conf->conf_signhdrs_raw,
 		                  sizeof conf->conf_signhdrs_raw);
 
-    (void) config_get(data, "OverSignHeaders",
+		(void) config_get(data, "OverSignHeaders",
 		                  &conf->conf_oversignhdrs_raw,
 		                  sizeof conf->conf_oversignhdrs_raw);
 
@@ -1768,16 +1768,18 @@ arcf_config_setlib(struct arcf_config *conf, char **err)
 	{
 		char *s = conf->conf_signhdrs_raw;
 		int cnt;
-		for (cnt=0; s[cnt]; s[cnt]==',' ? cnt++ : *s++);
+		for (cnt=0;
+		     s[cnt];
+		     s[cnt]==',' ? cnt++ : *s++);
 
 		conf->conf_signhdrs = malloc((cnt + 2) * sizeof(char *)); // TODO - be smarter
-		char *token = strtok (conf->conf_signhdrs_raw, ",");
+		char *token = strtok(conf->conf_signhdrs_raw, ",");
 		int i = 0;
 
 		while (token != NULL)
 		{
 			conf->conf_signhdrs[i++] = token;
-			token = strtok (NULL, ",");
+			token = strtok(NULL, ",");
 		}
 
 		conf->conf_signhdrs[i] = '\0';
@@ -1798,16 +1800,18 @@ arcf_config_setlib(struct arcf_config *conf, char **err)
 	{
 		char *s = conf->conf_oversignhdrs_raw;
 		int cnt;
-		for (cnt=0; s[cnt]; s[cnt]==',' ? cnt++ : *s++);
+		for (cnt=0;
+		     s[cnt];
+		     s[cnt]==',' ? cnt++ : *s++);
 
 		conf->conf_oversignhdrs = malloc((cnt + 2) * sizeof(char *));
-		char *token = strtok (conf->conf_oversignhdrs_raw, ",");
+		char *token = strtok(conf->conf_oversignhdrs_raw, ",");
 		int i = 0;
 
 		while (token != NULL)
 		{
 			conf->conf_oversignhdrs[i++] = token;
-			token = strtok (NULL, ",");
+			token = strtok(NULL, ",");
 		}
 
 		conf->conf_oversignhdrs[i] = '\0';
