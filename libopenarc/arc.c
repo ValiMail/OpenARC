@@ -2400,7 +2400,6 @@ arc_eoh(ARC_MESSAGE *msg)
 	ARC_KVSET *set;
 	u_char *inst;
 	u_char *htag;
-	int hashtype;
 
 	if (msg->arc_state >= ARC_STATE_EOH)
 		return ARC_STAT_INVALID;
