@@ -1768,13 +1768,16 @@ arcf_config_setlib(struct arcf_config *conf, char **err)
 	{
 		char *s = conf->conf_signhdrs_raw;
 		int cnt;
+		char *token;
+		int i = 0;
+		
 		for (cnt=0;
 		     s[cnt];
-		     s[cnt]==',' ? cnt++ : *s++);
+		     s[cnt]==',' ? cnt++ : *s++)
+			continue;
 
 		conf->conf_signhdrs = malloc((cnt + 2) * sizeof(char *)); // TODO - be smarter
-		char *token = strtok(conf->conf_signhdrs_raw, ",");
-		int i = 0;
+		token = strtok(conf->conf_signhdrs_raw, ",");
 
 		while (token != NULL)
 		{
@@ -1800,13 +1803,16 @@ arcf_config_setlib(struct arcf_config *conf, char **err)
 	{
 		char *s = conf->conf_oversignhdrs_raw;
 		int cnt;
+		int i = 0;
+		char *token;		
+		
 		for (cnt=0;
 		     s[cnt];
-		     s[cnt]==',' ? cnt++ : *s++);
+		     s[cnt]==',' ? cnt++ : *s++)
+			continue;
 
 		conf->conf_oversignhdrs = malloc((cnt + 2) * sizeof(char *));
-		char *token = strtok(conf->conf_oversignhdrs_raw, ",");
-		int i = 0;
+		token = strtok(conf->conf_oversignhdrs_raw, ",");
 
 		while (token != NULL)
 		{

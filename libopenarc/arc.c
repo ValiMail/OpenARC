@@ -1650,7 +1650,7 @@ arc_process_set(ARC_MESSAGE *msg, arc_kvsettype_t type, u_char *str,
 				{
 					set->set_bad = TRUE;
 					return ARC_STAT_SYNTAX;
-        }
+				}
 			}
 		}
 
@@ -1667,7 +1667,7 @@ arc_process_set(ARC_MESSAGE *msg, arc_kvsettype_t type, u_char *str,
 }
 
 /*
-**  ARC_GpET_KEY -- acquire a public key used for verification
+**  ARC_GET_KEY -- acquire a public key used for verification
 **
 **  Parameters:
 **  	msg -- ARC_MESSAGE handle

@@ -910,7 +910,9 @@ arc_copy_array(char **in)
 		continue;
 
 	out = malloc(sizeof(char *) * (n + 1));
-
+	if (out == NULL)
+		return NULL;
+	
 	for (c = 0; c < n; c++)
 	{
 		out[c] = strdup(in[c]);
