@@ -416,7 +416,7 @@ arc_genamshdr(ARC_MESSAGE *msg, struct arc_dstring *dstr, char *delim,
 		if (status != ARC_STAT_OK)
 			return 0;
 
-		status = arc_canon_getfinal(msg->arc_bodycanon,
+		status = arc_canon_getfinal(msg->arc_sign_bodycanon,
 		                            &hash, &hashlen);
 		if (status != ARC_STAT_OK)
 		{
@@ -432,7 +432,7 @@ arc_genamshdr(ARC_MESSAGE *msg, struct arc_dstring *dstr, char *delim,
 		if (msg->arc_partial)
 		{
 			arc_dstring_printf(dstr, ";%sl=%lu", delim,
-		                   	(u_long) msg->arc_bodycanon->canon_wrote);
+		                   	(u_long) msg->arc_sign_bodycanon->canon_wrote);
 		}
 
 		/* h= */
@@ -1639,6 +1639,20 @@ arc_process_set(ARC_MESSAGE *msg, arc_kvsettype_t type, u_char *str,
 			return ARC_STAT_SYNTAX;
 		}
 
+
+		/* check set for duplicates */
+		struct arc_plist *param;
+		struct arc_plist *dup;
+
+		for (param = set->set_plist[0]; param != NULL; param = param->plist_next) {
+			for (dup = param->plist_next; dup != NULL; dup = dup->plist_next) {
+				if (param->plist_param == dup->plist_param) {
+					set->set_bad = TRUE;
+					return ARC_STAT_SYNTAX;
+        }
+			}
+		}
+
 		break;
 
 	  case ARC_KVSETTYPE_AR:
@@ -2385,7 +2399,6 @@ arc_eoh(ARC_MESSAGE *msg)
 	ARC_KVSET *set;
 	u_char *inst;
 	u_char *htag;
-
 	if (msg->arc_state >= ARC_STATE_EOH)
 		return ARC_STAT_INVALID;
 	msg->arc_state = ARC_STATE_EOH;
@@ -2517,39 +2530,31 @@ arc_eoh(ARC_MESSAGE *msg)
 		h = msg->arc_sets[nsets - 1].arcset_ams;
 		htag = arc_param_get(h->hdr_data, "h");
 
+		if (strcmp(arc_param_get(h->hdr_data, "a"), "rsa-sha1") == 0)
+			hashtype = ARC_HASHTYPE_SHA1;
+		else
+			hashtype = ARC_HASHTYPE_SHA256;
+
 		status = arc_add_canon(msg, ARC_CANONTYPE_HEADER, msg->arc_canonhdr,
-						               msg->arc_signalg, htag, h, (ssize_t) -1,
-						               &msg->arc_valid_hdrcanon);
+		                       hashtype, htag, h, (ssize_t) -1,
+		                       &msg->arc_valid_hdrcanon);
 		if (status != ARC_STAT_OK)
 		{
 			arc_error(msg,
 								"failed to initialize header canonicalization object");
 			return status;
 		}
-	}
 
-	/* headers, signing */
-	status = arc_add_canon(msg, ARC_CANONTYPE_HEADER, msg->arc_canonhdr,
-	                       msg->arc_signalg, NULL, NULL, (ssize_t) -1,
-	                       &msg->arc_sign_hdrcanon);
-
-	if (status != ARC_STAT_OK)
-	{
-		arc_error(msg,
-		          "failed to initialize header canonicalization object");
-		return status;
-	}
-
-
-	/* body */
-	status = arc_add_canon(msg, ARC_CANONTYPE_BODY, msg->arc_canonbody,
-	                       hashtype, NULL, NULL, (ssize_t) -1,
-	                       &msg->arc_bodycanon);
-	if (status != ARC_STAT_OK)
-	{
-		arc_error(msg,
-			  "failed to initialize body canonicalization object");
-		return status;
+		/* body, validation */
+		status = arc_add_canon(msg, ARC_CANONTYPE_BODY, msg->arc_canonbody,
+		                       hashtype, NULL, NULL, (ssize_t) -1,
+		                       &msg->arc_valid_bodycanon);
+		if (status != ARC_STAT_OK)
+		{
+			arc_error(msg,
+			          "failed to initialize body canonicalization object");
+			return status;
+		}
 	}
 
 	/* sets already in the chain, validation */
@@ -2567,8 +2572,8 @@ arc_eoh(ARC_MESSAGE *msg)
 		{
 			h = msg->arc_sets[n].arcset_as;
 
-			if (strcmp(arc_param_get(h->hdr_data, "a"),
-			           "rsa-sha1") == 0)
+			int hashtype;
+			if (strcmp(arc_param_get(h->hdr_data, "a"), "rsa-sha1") == 0)
 				hashtype = ARC_HASHTYPE_SHA1;
 			else
 				hashtype = ARC_HASHTYPE_SHA256;
@@ -2590,6 +2595,17 @@ arc_eoh(ARC_MESSAGE *msg)
 		}
 	}
 
+	/* headers, signing */
+	status = arc_add_canon(msg, ARC_CANONTYPE_HEADER, msg->arc_canonhdr,
+	                       msg->arc_signalg, NULL, NULL, (ssize_t) -1,
+	                       &msg->arc_sign_hdrcanon);
+	if (status != ARC_STAT_OK)
+	{
+		arc_error(msg,
+							"failed to initialize header canonicalization object");
+		return status;
+	}
+
 	/* all sets, for the next chain, signing */
 	status = arc_add_canon(msg,
 	                       ARC_CANONTYPE_SEAL,
@@ -2603,6 +2619,17 @@ arc_eoh(ARC_MESSAGE *msg)
 	{
 		arc_error(msg,
 	          	"failed to initialize seal canonicalization object");
+		return status;
+	}
+
+	/* body, signing */
+	status = arc_add_canon(msg, ARC_CANONTYPE_BODY, msg->arc_canonbody,
+	                       msg->arc_signalg, NULL, NULL, (ssize_t) -1,
+	                       &msg->arc_sign_bodycanon);
+	if (status != ARC_STAT_OK)
+	{
+		arc_error(msg,
+		          "failed to initialize body canonicalization object");
 		return status;
 	}
 
