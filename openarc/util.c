@@ -872,11 +872,20 @@ arcf_inet_ntoa(struct in_addr a, char *buf, size_t buflen)
 */
 
 const char **
+arcf_mkarray2(char *in)
+{
+	printf("IN 2: %s\n", in);
+}
+
+
+const char **
 arcf_mkarray(char *in)
 {
-	int c;
+	printf("IN 1: %s\n", in);
+	int c = 0;
 	int n = 1;
 	char *p;
+	char *ctx;	
 	char **out = NULL;
 
 	assert(in != NULL);
@@ -886,14 +895,26 @@ arcf_mkarray(char *in)
 		if (*p == ',')
 			n++;
 	}
-
 	out = (char **) malloc((n + 1) * sizeof(char *));
 	if (out == NULL)
 		return (const char **) NULL;
 
-	for (p = strtok(in, ','); *p != NULL; p = strtok(NULL, ','))
-		out[c] = p;
-	out[c] = NULL;
+	for (p = strtok_r(in, ",", &ctx);
+	     p != NULL;
+			 p = strtok_r(NULL, ",", &ctx)){
+		out[c++] = p;
+	}
+	out[n+1] = NULL;
 
-	return (const char **) out;
+	for(int i=0; i<n; i++){
+		printf("header: %s\n", out[i]);
+	}
+	
+	return (const char **) out;		
 }
+	
+
+
+
+
+

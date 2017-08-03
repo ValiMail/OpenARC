@@ -1773,6 +1773,7 @@ arcf_config_setlib(struct arcf_config *conf, char **err)
 	if (conf->conf_signhdrs_raw != NULL)
 	{
 		conf->conf_signhdrs = arcf_mkarray(conf->conf_signhdrs_raw);
+
 		status = arc_options(conf->conf_libopenarc, ARC_OP_SETOPT,
 		                     ARC_OPTS_SIGNHDRS, conf->conf_signhdrs,
 		                     sizeof conf->conf_signhdrs);
