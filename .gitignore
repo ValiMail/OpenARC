@@ -57,3 +57,8 @@ stamp-h1
 # compilation artifacts
 libopenarc/symbols.map
 openarc/.libs/
+
+# emacs tmp files
+*~
+*.cache
+*#*

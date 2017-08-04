@@ -435,30 +435,6 @@ arc_genamshdr(ARC_MESSAGE *msg, struct arc_dstring *dstr, char *delim,
 		                   	   (u_long) msg->arc_bodycanon->canon_wrote);
 		}
 
-		/* h= */
-		firsthdr = TRUE;
-		for (hdr = msg->arc_hhead; hdr != NULL; hdr = hdr->hdr_next)
-		{
-			if ((hdr->hdr_flags & ARC_HDR_SIGNED) == 0)
-				continue;
-
-			if (!firsthdr)
-			{
-				arc_dstring_cat1(dstr, ':');
-			}
-			else
-			{
-				arc_dstring_cat1(dstr, ';');
-				arc_dstring_catn(dstr, (u_char *) delim,
-				                 delimlen);
-				arc_dstring_catn(dstr, (u_char *) "h=", 2);
-			}
-
-			firsthdr = FALSE;
-
-			arc_dstring_catn(dstr, hdr->hdr_text, hdr->hdr_namelen);
-		}
-
 		if (msg->arc_library->arcl_oversignhdrs != NULL &&
 		    msg->arc_library->arcl_oversignhdrs[0] != NULL)
 		{
@@ -2719,6 +2695,30 @@ arc_eom(ARC_MESSAGE *msg)
 	return ARC_STAT_OK;
 }
 
+
+// gene stuff
+void arc_insert_sig(struct arc_dstring *dstr, char *sig)
+{
+  struct arc_dstring *dstr2;
+  int idx;
+  char *str = (char *) arc_dstring_get(dstr);
+  for(idx = 0; idx < arc_dstring_len(dstr) - 1; idx++)
+    if(str[idx] == 'b' && str[idx+1] == '=')
+      break;
+  //printf("\n%i:%i\n\n", idx, arc_dstring_len(dstr));
+  // check error
+  dstr2 = arc_dstring_new(dstr->ds_msg, 500, 0);
+  arc_dstring_catn(dstr2, str, idx + 2);
+  //printf("Val 0: %s\n", (char *) arc_dstring_get(dstr2));
+  arc_dstring_cat(dstr2, sig);
+  //printf("Val 1: %s\n", (char *) arc_dstring_get(dstr2));
+  arc_dstring_cat(dstr2, str + idx + 2);
+  //printf("Val 2: %s\n", (char *) arc_dstring_get(dstr2));
+  arc_dstring_copy(dstr, (char *) arc_dstring_get(dstr2));
+  arc_dstring_free(dstr2);
+}
+
+
 /*
 **  ARC_GETSEAL -- get the "seal" to apply to this message
 **
@@ -2910,6 +2910,11 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 	arc_dstring_catn(dstr, sighdr, len);
 	len = arc_dstring_len(dstr);
 
+  // ggene stuff
+  printf("Input Value: %s\n", (char *) arc_dstring_get(dstr));
+  arc_std_header(dstr);
+  printf("Output Value: %s\n", (char *) arc_dstring_get(dstr));
+
 	hdr.hdr_text = arc_dstring_get(dstr);
 	hdr.hdr_colon = hdr.hdr_text + ARC_MSGSIG_HDRNAMELEN;
 	hdr.hdr_namelen = ARC_MSGSIG_HDRNAMELEN;
@@ -2989,7 +2994,13 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 	}
 
 	/* append it to the stub */
-	arc_dstring_cat(dstr, b64sig);
+  // ggene stuff
+  //  arc_dstring_cat(dstr, b64sig);
+
+  //printf("\nSIG: %s\n", b64sig);
+  //printf("Input Value: %s\n", (char *) arc_dstring_get(dstr));
+  arc_insert_sig(dstr, b64sig);
+  //printf("Output Value: %s\n", (char *) arc_dstring_get(dstr));
 
 	/* XXX -- wrapping needs to happen here */
 
@@ -3066,6 +3077,9 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 
 	arc_dstring_catn(dstr, sighdr, len);
 
+  // ggene stuff
+  arc_std_header(dstr);
+
 	hdr.hdr_text = arc_dstring_get(dstr);
 	hdr.hdr_colon = hdr.hdr_text + ARC_SEAL_HDRNAMELEN;
 	hdr.hdr_namelen = ARC_SEAL_HDRNAMELEN;
@@ -3130,7 +3144,9 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 	}
 
 	/* append it to the stub */
-	arc_dstring_cat(dstr, b64sig);
+  // ggene stuff
+  //arc_dstring_cat(dstr, b64sig);
+  arc_insert_sig(dstr, b64sig);
 
 	/* XXX -- wrapping needs to happen here */
 
@@ -3177,6 +3193,11 @@ arc_getseal(ARC_MESSAGE *msg, ARC_HDRFIELD **seal, char *authservid,
 	BIO_free(keydata);
 
 	*seal = msg->arc_sealhead;
+
+  /* ggene stuff */
+  printf("%s\n", msg->arc_sealhead->hdr_text);
+  printf("%s\n", msg->arc_sealhead->hdr_next->hdr_text);
+  printf("%s\n", msg->arc_sealhead->hdr_next->hdr_next->hdr_text);
 
 	return ARC_STAT_OK;
 }
