@@ -435,10 +435,12 @@ arc_genamshdr(ARC_MESSAGE *msg, struct arc_dstring *dstr, char *delim,
 					   (u_long) msg->arc_sign_bodycanon->canon_wrote);
 		}
 
+
+		printf("ADASDSADAS\\n\n\n\n");
 		/* h= */
 		firsthdr = TRUE;
 		for (hdr = msg->arc_hhead; hdr != NULL; hdr = hdr->hdr_next)
-		{
+		{			
 			_Bool wrote = FALSE;
 
 			if (firsthdr)
@@ -469,7 +471,9 @@ arc_genamshdr(ARC_MESSAGE *msg, struct arc_dstring *dstr, char *delim,
 		}
 	}
 
+	printf("ADASDSADAS\\n\n\n\n");
 	/* and finally, an empty b= */
+
 	arc_dstring_cat1(dstr, ';');
 	arc_dstring_catn(dstr, (u_char *) delim, delimlen);
 	arc_dstring_catn(dstr, (u_char *) "b=", 2);
@@ -492,7 +496,7 @@ arc_genamshdr(ARC_MESSAGE *msg, struct arc_dstring *dstr, char *delim,
 **  	An ARC_STAT_* constant.
 **
 **  Notes:
-**  	Per RFC6376 Section 3.7, the signature header returned here does
+**  	Per RFC6376 Section 3.7, the signature header returned here does439
 **  	not contain a trailing CRLF.
 */
 
