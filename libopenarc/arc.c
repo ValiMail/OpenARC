@@ -1287,6 +1287,34 @@ arc_add_plist(ARC_MESSAGE *msg, ARC_KVSET *set, u_char *param, u_char *value,
 }
 
 /*
+**  ARC_SET_HAS_DUPLICATE_ENTRIES -- check if a set of ARC headers contains duplicates 
+**
+**  Parameters:
+**    set -- An ARC_KVSET set of ARC headers
+**
+**  Return value:
+**    TRUE iff the set contains duplicates.
+*/
+static _Bool
+arc_set_has_duplicate_entries(ARC_KVSET *set)
+{
+	struct arc_plist *par;
+	struct arc_plist *dup;
+
+	for (par = set->set_plist[0]; par != NULL; par = par->plist_next)
+	{
+		for (dup = par->plist_next; dup != NULL; dup = dup->plist_next)
+		{
+			if (par->plist_param == dup->plist_param)
+			{
+				return TRUE;
+			}
+		}
+	}
+	return FALSE;
+}
+
+/*
 **  ARC_PROCESS_SET -- process a parameter set, i.e. a string of the form
 **                     param=value[; param=value]*
 **
@@ -1317,8 +1345,6 @@ arc_process_set(ARC_MESSAGE *msg, arc_kvsettype_t type, u_char *str,
 	char *ctx;
 	ARC_KVSET *set;
 	const char *settype;
-	struct arc_plist *par;
-	struct arc_plist *dup;
 
 	assert(msg != NULL);
 	assert(str != NULL);
@@ -1551,6 +1577,11 @@ arc_process_set(ARC_MESSAGE *msg, arc_kvsettype_t type, u_char *str,
 			return ARC_STAT_SYNTAX;
 		}
 
+		if (arc_set_has_duplicate_entries(set)) {
+			set->set_bad = TRUE;
+			return ARC_STAT_SYNTAX;
+		}
+
 		/* make sure nothing got signed that shouldn't be */
 		p = arc_param_get(set, (u_char *) "h");
 		hcopy = strdup(p);
@@ -1636,6 +1667,11 @@ arc_process_set(ARC_MESSAGE *msg, arc_kvsettype_t type, u_char *str,
 		{
 			arc_error(msg, "missing parameter(s) in %s data",
 			          settype);
+			set->set_bad = TRUE;
+			return ARC_STAT_SYNTAX;
+		}
+
+		if (arc_set_has_duplicate_entries(set)) {
 			set->set_bad = TRUE;
 			return ARC_STAT_SYNTAX;
 		}
